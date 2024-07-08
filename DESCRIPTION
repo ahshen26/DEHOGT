@@ -1,0 +1,33 @@
+Package: DEHOGT
+Title: Differentially Expressed Heterogeneous Overdispersion Gene Test
+Version: 0.99.0
+Authors@R: c(
+    person("Arlina", "Shen", email = "arlinashen@yahoo.com", role = c("aut", "cre")),
+    person("Annie", "Qu", email = "aqu2@uci.edu", role = c("aut", "cre")),
+    person("Qi", "Xu", email = "qxu6@uci.edu", role = c("aut", "cre")),
+    person("Yubai", "Yuan", email = "yvy5509@psu.edu", role = c("aut", "cre"))
+)
+Description: Implements a generalized linear model approach for identifying 
+    differentially expressed genes across treatment groups. Supports 
+    quasi-Poisson and negative binomial models, incorporating treatment 
+    effects, normalization factors, and significance thresholds.
+Imports: 
+    foreach, 
+    doParallel, 
+    MASS, 
+    ROSE, 
+    multcomp, 
+    MLmetrics, 
+    VennDiagram, 
+    pROC, 
+    progress, 
+    dplyr, 
+    tidyverse, 
+    ggplot2, 
+    BiocManager
+
+License: GPL-3
+Encoding: UTF-8
+biocViews: BiocVersion, aggregateBioVar
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
