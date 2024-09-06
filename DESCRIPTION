@@ -8,20 +8,32 @@ Authors@R: c(
     person("Yubai", "Yuan", email = "yvy5509@psu.edu", role = "ctb"),
     person("Annie", "Qu", email = "aqu2@uci.edu", role = "ctb")
   )
-Description: Implements a generalized linear model approach for identifying
-    differentially expressed genes across treatment groups. Supports 
-    quasi-Poisson and negative binomial models, incorporating treatment 
-    effects, normalization factors, and significance thresholds.
+Description: Implements a generalized linear model approach for detecting
+    differentially expressed genes across treatment groups in count data. The
+    package supports both quasi-Poisson and negative binomial models to handle
+    overdispersion, ensuring robust identification of differential expression.
+    It allows for the inclusion of treatment effects and gene-wise covariates, 
+    as well as normalization factors for accurate scaling across samples.
+    Additionally, it incorporates statistical significance testing with
+    options for p-value adjustement and log2 fold cange thresholds,
+    making it suitable for RNA-seq analysis. 
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
+LazyData: FALSE
 Depends: 
     R (>= 3.5.0)
 Imports: 
     doParallel,
     foreach,
     MASS
+Suggests:
+    knitr,
+    rmarkdown,
+    BiocStyle
 biocViews: 
-    GeneExpression, DifferentialExpression, StatisticalMethod, Regression 
+    GeneExpression, DifferentialExpression, StatisticalMethod, Regression, Normalization
+VignetteBuilder: knitr
 RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
+URL: https://github.com/ahshen26/DEHOGT
+BugReports: https://github.com/ahshen26/DEHOGT
