@@ -4,7 +4,8 @@ Title: Differentially Expressed Heterogeneous Overdispersion Gene Test for Count
 Version: 0.99.0
 Authors@R: c(
     person("Qi", "Xu", email = "qixu@andrew.cmu.edu", role = c("aut")),
-    person("Arlina", "Shen", email = "ahshen24@berkeley.edu", role = "cre"),
+    person("Arlina", "Shen", email = "ahshen24@berkeley.edu", role = c("cre"),
+    comment = c(ORCID = "0009-0008-5330-6659")),
     person("Yubai", "Yuan", email = "yvy5509@psu.edu", role = "ctb"),
     person("Annie", "Qu", email = "aqu2@uci.edu", role = "ctb")
   )
