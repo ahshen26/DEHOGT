@@ -24,16 +24,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 abstract: >
-<<<<<<< HEAD
   This vignette describes the use of DEHOGT, a package for identifying differentially expressed genes using a generalized linear model approach. The package supports quasi-Poisson and negative binomial models to accommodate overdispersion in gene expression count data, integrating factors such as treatment effects, normalization, and significance testing.
-=======
-  This vignette describes the use of DEHOGT, a package for identifying
-  differentially expressed genes using a generalized linear model 
-  approach. The package supports quasi-Poisson and negative binomial 
-  models to accommodate overdispersion in gene expression count data, 
-  integrating factors such as treatment effects, normalization, and 
-  significance testing.
->>>>>>> ec49edb (Your commit message)
 ---
 
 ```{r setup, include=FALSE}
@@ -43,26 +34,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-<<<<<<< HEAD
 DEHOGT is designed to handle overdispersion in count data using a generalized linear model (GLM) framework. The package supports quasi-Poisson and negative binomial models, making it useful for differential expression analysis of RNA-seq and other count-based data types.
-=======
-DEHOGT is designed to handle overdispersion in count data
-using a generalized linear model (GLM) framework. 
-The package supports quasi-Poisson and negative binomial models, 
-making it useful for differential expression analysis of
-RNA-seq and other count-based data types.
->>>>>>> ec49edb (Your commit message)
 
 # Installation
 
 
 ```{r installation, eval=FALSE}
 if (!require("BiocManager", quietly = TRUE)) {
-<<<<<<< HEAD
     install.packages("BiocManager")
-=======
-  install.packages("BiocManager")
->>>>>>> ec49edb (Your commit message)
 }
 
 BiocManager::install("DEHOGT")
@@ -70,14 +49,7 @@ BiocManager::install("DEHOGT")
 
 # Example Worklow
 
-<<<<<<< HEAD
 In this example, we simulate gene expression data and perform differential expression analysis using the quasi-Poisson model. We also show how to incorporate covariates and normalization factors.
-=======
-In this example, we simulate gene expression data
-and perform differential expression analysis using
-the quasi-Poisson model. We also show how to 
-incorporate covariates and normalization factors.
->>>>>>> ec49edb (Your commit message)
 
 ```{r exampleWorkflow}
 ## Simulate gene expression data (100 genes, 10 samples)
