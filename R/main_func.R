@@ -27,113 +27,104 @@
 #' # Run main function with parallel computing using 2 cores
 #' result <- dehogt_func(data, treatment, num_cores = 2)
 #' @export
-dehogt_func <- function(data, treatment, norm_factors = NULL, covariates=NULL, dist = "qpois", padj = TRUE, pval_thre = 0.05, l2fc = FALSE, l2fc_thre = 1, num_cores = 1) {
+dehogt_func <- function(data, treatment, norm_factors = NULL, covariates = NULL, dist = "qpois", padj = TRUE, pval_thre = 0.05, l2fc = FALSE, l2fc_thre = 1, num_cores = 1) {
+    median_ratio_norm_factor <- function(data) {
+        # create a pseudo-reference sample (geometric mean across all samples for each gene)
+        geom_means <- apply(data, 1, function(x) exp(mean(log(x[x > 0]))))
 
-  median_ratio_norm_factor <- function(data){
+        # calculate the ratio of each sample to the pseudo-reference sample
+        ratios <- t(t(data) / geom_means)
 
-    # create a pseudo-reference sample (geometric mean across all samples for each gene)
-    geom_means <- apply(data, 1, function(x) exp(mean(log(x[x > 0]))))
+        # Step 3: Calculate the normalization factor (median of ratios for each sample)
+        size_factors <- apply(ratios, 2, median, na.rm = TRUE)
 
-    # calculate the ratio of each sample to the pseudo-reference sample
-    ratios <- t(t(data) / geom_means)
-
-    # Step 3: Calculate the normalization factor (median of ratios for each sample)
-    size_factors <- apply(ratios, 2, median, na.rm = TRUE)
-
-    return(size_factors)
-  }
-
-  # Initialize parallel computing
-  registerDoParallel(cores = num_cores)
-
-  # number of samples
-  num_samples <- ncol(data)
-
-  # covariates adjustment if covariates are provided
-
-  if (!is.null(covariates)) {
-
-    if (nrow(covariates) != nrow(data)) {
-      stop("Number of rows in covariates matrix should match the number of genes in the data matrix.")
+        return(size_factors)
     }
 
-    else {
+    # Initialize parallel computing
+    registerDoParallel(cores = num_cores)
 
-      vec_data = as.vector(data)
+    # number of samples
+    num_samples <- ncol(data)
 
-      rep_row_index = rep(1: nrow(data), each = num_samples)
-
-      rep_covariates = covariates[rep_row_index, ]
-
-      if (dist == "qpois") {
-        adjust_model = glm(vec_data ~ rep_covariates - 1, family = quasipoisson())
-      } else if (dist == "negbin") {
-        adjust_model = glm.nb(vec_data ~ rep_covariates - 1)
-      }
-
-      beta = coef(adjust_model)
-    }
-  }
-
-  # calculate size factors for each sample
-  size_factors <- median_ratio_norm_factor(data)
-
-  # perform gene-wise GLM, with parallel computing
-  result_GLM <- foreach(i = seq_len(nrow(data)), .combine = rbind) %dopar% {
-
-    genewise_data <- data[i, ]
+    # covariates adjustment if covariates are provided
 
     if (!is.null(covariates)) {
-      adjust <- covariates[i, ] %*% beta
+        if (nrow(covariates) != nrow(data)) {
+            stop("Number of rows in covariates matrix should match the number of genes in the data matrix.")
+        } else {
+            vec_data <- as.vector(data)
+
+            rep_row_index <- rep(seq_len(nrow(data)), each = num_samples)
+
+            rep_covariates <- covariates[rep_row_index, ]
+
+            if (dist == "qpois") {
+                adjust_model <- glm(vec_data ~ rep_covariates - 1, family = quasipoisson())
+            } else if (dist == "negbin") {
+                adjust_model <- glm.nb(vec_data ~ rep_covariates - 1)
+            }
+
+            beta <- coef(adjust_model)
+        }
+    }
+
+    # calculate size factors for each sample
+    size_factors <- median_ratio_norm_factor(data)
+
+    # perform gene-wise GLM, with parallel computing
+    result_GLM <- foreach(i = seq_len(nrow(data)), .combine = rbind) %dopar% {
+        genewise_data <- data[i, ]
+
+        if (!is.null(covariates)) {
+            adjust <- covariates[i, ] %*% beta
+        } else {
+            adjust <- 0
+        }
+
+        genewise_dataframe <- data.frame(count = genewise_data, treatment = treatment, size_factors = size_factors, adjust = rep(adjust, num_samples))
+
+        # define formula for GLM
+        model_formula <- as.formula("count ~ treatment + offset(log(size_factors)) + offset(adjust)")
+
+        if (dist == "qpois") {
+            model <- glm(formula = model_formula, family = quasipoisson(), data = genewise_dataframe)
+
+            coefficients <- coef(summary(model))[2, "Estimate"]
+            p_values <- coef(summary(model))[2, "Pr(>|t|)"]
+            padj_values <- p.adjust(p_values, method = "BH")
+            log2fold <- log(exp(abs(coefficients)), base = 2)
+        } else if (dist == "negbin") {
+            model <- glm.nb(formula = model_formula, data = genewise_dataframe)
+
+            coefficients <- coef(summary(model))[2, "Estimate"]
+            p_values <- coef(summary(model))[2, "Pr(>|z|)"]
+            padj_values <- p.adjust(p_values, method = "BH")
+            log2fold <- log(exp(abs(coefficients)), base = 2)
+        }
+
+        c(coefficients, p_values, padj_values, log2fold)
+    }
+
+    stopImplicitCluster()
+
+    colnames(result_GLM) <- c("Coefficient", "P_value", "P_adj_value", "Log2fold")
+
+    if (padj) {
+        pvals <- result_GLM[, "P_adj_value"]
     } else {
-      adjust <- 0
+        pvals <- result_GLM[, "P_value"]
     }
 
-    genewise_dataframe <- data.frame(count = genewise_data, treatment = treatment, size_factors = size_factors, adjust = rep(adjust, num_samples))
+    idx <- which(pvals < pval_thre)
 
-    # define formula for GLM
-    model_formula = as.formula("count ~ treatment + offset(log(size_factors)) + offset(adjust)")
+    log2fold <- result_GLM[, "Log2fold"]
 
-    if (dist == "qpois") {
-      model = glm(formula = model_formula, family = quasipoisson(), data = genewise_dataframe)
-
-      coefficients <- coef(summary(model))[2, "Estimate"]
-      p_values <- coef(summary(model))[2, "Pr(>|t|)"]
-      padj_values <- p.adjust(p_values, method = "BH")
-      log2fold <- log(exp(abs(coefficients)), base = 2)
-
-    } else if (dist == "negbin") {
-      model = glm.nb(formula = model_formula, data = genewise_dataframe)
-
-      coefficients <- coef(summary(model))[2, "Estimate"]
-      p_values <- coef(summary(model))[2, "Pr(>|z|)"]
-      padj_values <- p.adjust(p_values, method = "BH")
-      log2fold <- log(exp(abs(coefficients)), base = 2)
-
+    if (l2fc) {
+        idx <- which(abs(log2fold) > l2fc_thre)
     }
 
-    c(coefficients, p_values, padj_values, log2fold)
-  }
+    output <- list(DE_idx = as.numeric(idx), pvals = as.numeric(pvals), log2fc = as.numeric(log2fold))
 
-  stopImplicitCluster()
-
-  colnames(result_GLM) <- c("Coefficient", "P_value", "P_adj_value", "Log2fold")
-
-  if (padj) {
-    pvals <- result_GLM[, "P_adj_value"]
-  } else {
-    pvals <- result_GLM[, "P_value"]
-  }
-
-  idx <- which(pvals < pval_thre)
-
-  log2fold <- result_GLM[, "Log2fold"]
-
-  if (l2fc) {
-    idx <- which(abs(log2fold) > l2fc_thre)
-  }
-
-  output <- list(DE_idx = as.numeric(idx), pvals = as.numeric(pvals), log2fc = as.numeric(log2fold))
-
-  return(output)
+    return(output)
 }
