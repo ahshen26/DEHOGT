@@ -3,8 +3,8 @@ Type: Package
 Title: Differentially Expressed Heterogeneous Overdispersion Gene Test for Count Data
 Version: 0.99.0
 Authors@R: c(
-    person("Qi", "Xu", email = "qixu@andrew.cmu.edu", role = c("aut", "cre")),
-    person("Arlina", "Shen", email = "arlinashen@yahoo.com", role = "aut"),
+    person("Qi", "Xu", email = "qixu@andrew.cmu.edu", role = c("aut")),
+    person("Arlina", "Shen", email = "ahshen24@berkeley.edu", role = "cre"),
     person("Yubai", "Yuan", email = "yvy5509@psu.edu", role = "ctb"),
     person("Annie", "Qu", email = "aqu2@uci.edu", role = "ctb")
   )
@@ -15,7 +15,7 @@ Description: Implements a generalized linear model approach for detecting
     It allows for the inclusion of treatment effects and gene-wise covariates, 
     as well as normalization factors for accurate scaling across samples.
     Additionally, it incorporates statistical significance testing with
-    options for p-value adjustement and log2 fold cange thresholds,
+    options for p-value adjustment and log2 fold range thresholds,
     making it suitable for RNA-seq analysis. 
 License: GPL-3
 Encoding: UTF-8
