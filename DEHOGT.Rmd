@@ -1,0 +1,80 @@
+---
+title: "Differentially Expressed Heterogeneous Overdispersion Gene Test for Count Data"
+author:
+  - name: "Qi Xu"
+    email: "qixu@andrew.cmu.edu"
+    affiliation: "Carnegie Mellon University"
+  - name: "Arlina Shen"
+    email: "arlinashen@yahoo.com"
+    affiliation: "Independent Researcher"
+  - name: "Yubai Yuan"
+    email: "yvy5509@psu.edu"
+    affiliation: "Pennsylvania State University"
+  - name: "Annie Qu"
+    email: "aqu2@uci.edu"
+    affiliation: "University of California, Irvine"
+date: "`r BiocStyle::doc_date()`"
+package: "`r BiocStyle::pkg_ver('DEHOGT')`"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{DEHOGT: Differentially Expressed Heterogeneous Overdispersion Gene Test for Count Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+abstract: >
+  This vignette describes the use of DEHOGT, a package for identifying differentially expressed genes using a generalized linear model approach. The package supports quasi-Poisson and negative binomial models to accommodate overdispersion in gene expression count data, integrating factors such as treatment effects, normalization, and significance testing.
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Introduction
+
+DEHOGT is designed to handle overdispersion in count data using a generalized linear model (GLM) framework. The package supports quasi-Poisson and negative binomial models, making it useful for differential expression analysis of RNA-seq and other count-based data types.
+
+# Installation
+
+
+```{r installation, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE)) {
+    install.packages("BiocManager")
+}
+
+BiocManager::install("DEHOGT")
+```
+
+# Example Worklow
+
+In this example, we simulate gene expression data and perform differential expression analysis using the quasi-Poisson model. We also show how to incorporate covariates and normalization factors.
+
+```{r exampleWorkflow}
+## Simulate gene expression data (100 genes, 10 samples)
+data <- matrix(rpois(1000, 10), nrow = 100, ncol = 10)
+
+## Randomly assign treatment groups
+treatment <- sample(0:1, 10, replace = TRUE)
+## Load DEHOGT package
+library(DEHOGT)
+
+## Run the function with 2 CPU cores
+result <- dehogt_func(data, treatment, num_cores = 2)
+
+## Display results
+head(result$pvals)
+
+# Example: Adding covariates and normalization factors
+covariates <- matrix(rnorm(1000), nrow = 100, ncol = 10)
+norm_factors <- rep(1, 10)
+
+# Run with covariates and normalization factors
+result_cov <- dehogt_func(data, treatment, covariates = covariates, norm_factors = norm_factors, num_cores = 2)
+```
+# Session Info
+```{r sessionInfo, results='asis'}
+sessionInfo()
+```
+
